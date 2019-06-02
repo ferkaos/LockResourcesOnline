@@ -26,7 +26,7 @@ namespace LockResourcesOnline {
             set { myUser = value; }
         }
         string userId;
-        LockResource resourceToBlock;
+        LockResource resourceToBlock = new LockResource("",ResourceType.GameObject,null);
         bool selectedResourceToggle;
         Vector2 scrollPos;
         bool orderByResource;
@@ -41,6 +41,9 @@ namespace LockResourcesOnline {
 
         private void UserSettingsGUI() {
             GUILayout.Label("User Settings", EditorStyles.boldLabel);
+            if(MyUser == null) {
+                MyUser = LockResourcesOnlineManager.SearchMyUser();
+            }
             if (MyUser != null) {
                 EditorGUI.BeginDisabledGroup(true);
                 EditorGUILayout.BeginHorizontal();
@@ -79,7 +82,7 @@ namespace LockResourcesOnline {
             GUILayout.Space(10);
             EditorGUILayout.BeginHorizontal();
             selectedResourceToggle = EditorGUILayout.Toggle("Resource From Selection", selectedResourceToggle);
-            if (selectedResourceToggle) {
+            if (selectedResourceToggle && resourceToBlock.resource != null) {
                 resourceToBlock.resource = Selection.activeGameObject;
                 resourceToBlock.resourceType = ResourceType.GameObject;
                 resourceToBlock.name = resourceToBlock.resource.name;
@@ -87,7 +90,7 @@ namespace LockResourcesOnline {
             resourceToBlock.resource = (GameObject) EditorGUILayout.ObjectField((GameObject)resourceToBlock.resource, typeof(GameObject), true);
             if (GUILayout.Button("Add Object")) {
 
-                if(resourceToBlock == null || dictionaryResources.FirstOrDefault(o => o.Key.name == resourceToBlock.name).Key != null) {
+                if(resourceToBlock.resource == null || dictionaryResources.FirstOrDefault(o => o.Key.name == resourceToBlock.name).Key != null) {
                     return;
                 }
                 LockResourcesOnlineManager.AddObjectToBlock(MyUser.UserId, resourceToBlock);
@@ -122,6 +125,9 @@ namespace LockResourcesOnline {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(userId, GUILayout.Width(w2));
             EditorGUILayout.LabelField(resource.name, GUILayout.Width(w1));
+            if(myUser == null) {
+                return false;
+            }
             if(userId == myUser.UserId) {
                 if (GUI.Button(new Rect(GUILayoutUtility.GetLastRect().position.x + 400, GUILayoutUtility.GetLastRect().position.y, 100, 20), "Remove Object")) {
                     if (resourceToBlock == null) {
